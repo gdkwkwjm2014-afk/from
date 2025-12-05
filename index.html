@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Stars Market | Купить звёзды</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+
+        body {
+            background: #0f0f23;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Preloader */
+        .preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .preloader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .from-market {
+            font-size: 24px;
+            color: #8a63d2;
+            margin-bottom: 30px;
+            letter-spacing: 3px;
+            font-weight: 300;
+            text-transform: uppercase;
+        }
+
+        .loading-bar {
+            width: 300px;
+            height: 4px;
+            background: rgba(138, 99, 210, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .loading-progress {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #8a63d2, #6c42c5);
+            border-radius: 2px;
+            animation: loading 2s ease-in-out forwards;
+        }
+
+        @keyframes loading {
+            0% { width: 0%; }
+            30% { width: 40%; }
+            70% { width: 80%; }
+            100% { width: 100%; }
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s ease;
+        }
+
+        .container.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Header */
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(138, 99, 210, 0.2);
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #8a63d2, #6c42c5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #8a63d2, #6c42c5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .user-wallet {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .balance {
+            background: rgba(138, 99, 210, 0.1);
+            border: 1px solid rgba(138, 99, 210, 0.3);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            text-align: center;
+            margin: 40px 0 50px;
+            padding: 40px;
+            background: linear-gradient(135deg, rgba(138, 99, 210, 0.1), rgba(106, 66, 197, 0.05));
+            border-radius: 20px;
+            border: 1px solid rgba(138, 99, 210, 0.2);
+        }
+
+        .hero-title {
+            font-size: 42px;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #8a63d2, #6c42c5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            color: #a0a0c0;
+            font-size: 18px;
+            max-width: 600px;
+            margin: 0 auto 30px;
+            line-height: 1.6;
+        }
+
+        /* Stars Grid */
+        .stars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+
+        .star-card {
+            background: rgba(42, 42, 58, 0.8);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .star-card:hover {
+            border-color: rgba(138, 99, 210, 0.5);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(138, 99, 210, 0.2);
+        }
+
+        .star-card.selected {
+            border-color: #8a63d2;
+            background: rgba(138, 99, 210, 0.15);
+        }
+
+        .star-amount {
+            font-size: 36px;
+            font-weight: 700;
+            color: #8a63d2;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .star-icon {
+            font-size: 28px;
+        }
+
+        .star-price {
+            font-size: 24px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 15px;
+        }
+
+        .star-rate {
+            font-size: 14px;
+            color: #a0a0c0;
+            margin-bottom: 20px;
+        }
+
+        .buy-button {
+            background: linear-gradient(135deg, #8a63d2, #6c42c5);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .buy-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(138, 99, 210, 0.4);
+        }
+
+        .buy-button.disabled {
+            background: #444;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .buy-button.disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Custom Amount Section */
+        .custom-amount {
+            background: rgba(42, 42, 58, 0.8);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 50px;
+            border: 1px solid rgba(138, 99, 210, 0.3);
+        }
+
+        .custom-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #8a63d2;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .custom-input-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .custom-input {
+            flex: 1;
+            background: rgba(30, 30, 40, 0.8);
+            border: 2px solid rgba(138, 99, 210, 0.3);
+            border-radius: 10px;
+            padding: 16px;
+            color: white;
+            font-size: 18px;
+        }
+
+        .custom-input:focus {
+            outline: none;
+            border-color: #8a63d2;
+        }
+
+        .stars-label {
+            white-space: nowrap;
+            color: #8a63d2;
+            font-weight: 600;
+        }
+
+        .calculate-button {
+            background: linear-gradient(135deg, #8a63d2, #6c42c5);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .calculate-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(138, 99, 210, 0.4);
+        }
+
+        .custom-result {
+            display: none;
+            background: rgba(30, 30, 40, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #8a63d2;
+        }
+
+        .custom-result.active {
+            display: block;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        /* Coming Soon Banner */
+        .coming-soon-banner {
+            background: linear-gradient(135deg, rgba(138, 99, 210, 0.1), rgba(106, 66, 197, 0.05));
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 40px;
+            border: 1px solid rgba(138, 99, 210, 0.3);
+        }
+
+        .coming-soon-title {
+            font-size: 28px;
+            color: #8a63d2;
+            margin-bottom: 15px;
+        }
+
+        .coming-soon-text {
+            color: #a0a0c0;
+            font-size: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Promo Image Section */
+        .promo-section {
+            margin: 50px 0;
+            text-align: center;
+        }
+
+        .promo-title {
+            font-size: 24px;
+            color: #8a63d2;
+            margin-bottom: 20px;
+        }
+
+        .promo-image {
+            max-width: 100%;
+            border-radius: 16px;
+            border: 2px solid rgba(138, 99, 210, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            margin-top: 50px;
+            border-top: 1px solid rgba(138, 99, 210, 0.2);
+            color: #a0a0c0;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 15, 35, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(42, 42, 58, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            border: 1px solid rgba(138, 99, 210, 0.3);
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-icon {
+            font-size: 60px;
+            color: #8a63d2;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 28px;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .modal-text {
+            color: #a0a0c0;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .modal-button {
+            background: linear-gradient(135deg, #8a63d2, #6c42c5);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stars-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+            
+            .hero-title {
+                font-size: 32px;
+            }
+            
+            .custom-input-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .logo {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Preloader -->
+    <div class="preloader" id="preloader">
+        <div class="from-market">from market</div>
+        <div class="loading-bar">
+            <div class="loading-progress"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container" id="mainContent">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="logo">
+                <div class="logo-icon">★</div>
+                Telegram Stars Market
+            </div>
+            <div class="user-wallet">
+                <div class="balance">Ваш баланс: <strong>0 звёзд</strong></div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h1 class="hero-title">Купить Telegram Stars</h1>
+            <p class="hero-subtitle">Приобретайте звёзды для поддержки создателей, покупки в ботах и мини-приложениях. Мгновенная доставка 24/7.</p>
+        </section>
+
+        <!-- Stars Grid -->
+        <div class="stars-grid" id="starsGrid">
+            <!-- Stars will be generated by JavaScript -->
+        </div>
+
+        <!-- Custom Amount Section -->
+        <section class="custom-amount">
+            <h2 class="custom-title">
+                <span>★</span>
+                Введите своё количество звёзд
+            </h2>
+            <div class="custom-input-group">
+                <input type="number" class="custom-input" id="customAmount" placeholder="Введите количество звёзд" min="50" max="10000">
+                <span class="stars-label">звёзд</span>
+                <button class="calculate-button" id="calculateBtn">Рассчитать</button>
+            </div>
+            <div class="custom-result" id="customResult">
+                <div class="result-row">
+                    <span>Количество звёзд:</span>
+                    <span id="resultAmount">0</span>
+                </div>
+                <div class="result-row">
+                    <span>Стоимость:</span>
+                    <span id="resultPrice">0 ₽</span>
+                </div>
+                <div class="result-row">
+                    <span>Курс:</span>
+                    <span id="resultRate">1.6 ₽ за звезду</span>
+                </div>
+                <button class="buy-button" id="customBuyBtn">Купить</button>
+            </div>
+        </section>
+
+        <!-- Coming Soon Banner -->
+        <div class="coming-soon-banner">
+            <h3 class="coming-soon-title">🔄 Система оплаты скоро будет доступна</h3>
+            <p class="coming-soon-text">В данный момент мы работаем над интеграцией платёжных систем. Вы можете ознакомиться с ценами и выбрать нужный пакет звёзд.</p>
+        </div>
+
+        <!-- Promo Image Section -->
+        <section class="promo-section">
+            <h3 class="promo-title">Как работают Telegram Stars</h3>
+            <!-- ВСТАВЬТЕ СВОЁ ФОТО ЗДЕСЬ -->
+            <img src="https://i.ibb.co/NgRHvSyB/file-0000000000dc7246962963071f086708.png" alt="Telegram Stars Promo" class="promo-image">
+            <p style="color: #a0a0c0; margin-top: 15px; font-size: 14px;">Звёзды позволяют поддерживать создателей контента и покупать товары в Telegram</p>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>© 2024 Telegram Stars Market. Все права защищены.</p>
+            <p style="margin-top: 10px; font-size: 14px;">Telegram и логотип Telegram являются товарными знаками Telegram Messenger Inc.</p>
+        </footer>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="comingSoonModal">
+        <div class="modal-content">
+            <div class="modal-icon">⏳</div>
+            <h2 class="modal-title">Скоро будет доступно</h2>
+            <p class="modal-text">Система оплаты находится в разработке и будет запущена в ближайшее время. Вы уже можете выбрать нужный пакет звёзд и рассчитать стоимость.</p>
+            <button class="modal-button" id="closeModalBtn">Понятно</button>
+        </div>
+    </div>
+
+    <script>
+        // Preloader
+        window.addEventListener('load', function() {
+            const preloader = document.getElementById('preloader');
+            const mainContent = document.getElementById('mainContent');
+            
+            setTimeout(() => {
+                preloader.classList.add('hidden');
+                setTimeout(() => {
+                    mainContent.classList.add('active');
+                }, 300);
+            }, 2000);
+        });
+
+        // Stars data - starting from 50 stars for 80 rub
+        const starsData = [
+            { amount: 50, price: 80 },
+            { amount: 100, price: 155 },
+            { amount: 150, price: 225 },
+            { amount: 200, price: 290 },
+            { amount: 250, price: 350 },
+            { amount: 300, price: 405 },
+            { amount: 350, price: 455 },
+            { amount: 400, price: 500 },
+            { amount: 450, price: 540 },
+            { amount: 500, price: 575 }
+        ];
+
+        // Generate stars grid
+        const starsGrid = document.getElementById('starsGrid');
+        
+        starsData.forEach((star, index) => {
+            const rate = (star.price / star.amount).toFixed(2);
+            
+            const starCard = document.createElement('div');
+            starCard.className = 'star-card';
+            starCard.innerHTML = `
+                <div class="star-amount">
+                    <span class="star-icon">★</span>
+                    ${star.amount}
+                </div>
+                <div class="star-price">${star.price} ₽</div>
+                <div class="star-rate">${rate} ₽ за звезду</div>
+                <button class="buy-button disabled" data-amount="${star.amount}" data-price="${star.price}">
+                    Купить
+                </button>
+            `;
+            
+            starsGrid.appendChild(starCard);
+        });
+
+        // Calculate custom amount
+        const calculateBtn = document.getElementById('calculateBtn');
+        const customAmountInput = document.getElementById('customAmount');
+        const customResult = document.getElementById('customResult');
+        const resultAmount = document.getElementById('resultAmount');
+        const resultPrice = document.getElementById('resultPrice');
+        const resultRate = document.getElementById('resultRate');
+        const customBuyBtn = document.getElementById('customBuyBtn');
+
+        calculateBtn.addEventListener('click', function() {
+            const amount = parseInt(customAmountInput.value);
+            
+            if (amount && amount >= 50) {
+                // Расчет цены: первые 50 звезд по 1.6 руб, затем цена снижается
+                let price;
+                if (amount <= 50) {
+                    price = amount * 1.6;
+                } else if (amount <= 200) {
+                    price = 50 * 1.6 + (amount - 50) * 1.55;
+                } else if (amount <= 500) {
+                    price = 50 * 1.6 + 150 * 1.55 + (amount - 200) * 1.5;
+                } else {
+                    price = 50 * 1.6 + 150 * 1.55 + 300 * 1.5 + (amount - 500) * 1.45;
+                }
+                
+                price = Math.round(price);
+                const rate = (price / amount).toFixed(2);
+                
+                resultAmount.textContent = `${amount} звёзд`;
+                resultPrice.textContent = `${price} ₽`;
+                resultRate.textContent = `${rate} ₽ за звезду`;
+                
+                customResult.classList.add('active');
+            } else {
+                alert('Введите количество звёзд (минимум 50)');
+            }
+        });
+
+        // Buy buttons functionality
+        const buyButtons = document.querySelectorAll('.buy-button');
+        const comingSoonModal = document.getElementById('comingSoonModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        buyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                if (this.classL
